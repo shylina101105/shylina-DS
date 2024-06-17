@@ -1,0 +1,234 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node {
+    int coeff;
+    int pow;
+    struct node *link;
+};
+
+struct node *poly1 = NULL;
+struct node *poly2 = NULL;
+struct node *result = NULL;
+struct node *newnode;
+struct node *temp;
+
+struct node* createnode() {
+    newnode=(struct node*)malloc(sizeof(struct node));
+    printf("\nEnter coefficient: ");
+    scanf("%d",&newnode->coeff);
+    printf("Enter power: ");
+    scanf("%d",&newnode->pow);
+    newnode->link=NULL;
+    return newnode;
+}
+
+struct node* createlist(struct node* poly) {
+    int choice;
+    do {
+        newnode=createnode();
+        if(poly==NULL) {
+            poly=newnode;
+            poly->link=NULL;
+            temp=poly;
+        } else {
+            temp->link=newnode;
+            newnode->link=NULL;
+            temp=newnode;
+        }
+        printf("\nEnter 1 to continue, 0 to stop: ");
+        scanf("%d",&choice);
+    } while(choice==1);
+    return poly;
+}
+
+void display(struct node* poly) {
+    temp=poly;
+    while(temp!=NULL) {
+        printf("%dx^%d",temp->coeff,temp->pow);
+        temp=temp->link;
+        if(temp!=NULL && temp->coeff>0) {
+            printf("+");
+        }
+    }
+}
+
+struct node* addpoly(struct node* poly1,struct node* poly2,struct node* result) {
+    struct node* t1 = poly1;
+    struct node* t2 = poly2;
+    temp = result;
+    while(t1 != NULL && t2 != NULL) {
+        newnode=(struct node*)malloc(sizeof(struct node));
+        if(t1->pow == t2->pow) {
+            newnode->coeff = t1->coeff + t2->coeff;
+            newnode->pow = t1->pow;
+            temp->link = newnode;
+            temp = newnode;
+            t1 = t1->link;
+            t2 = t2->link;
+        } else if(t1->pow > t2->pow) {
+            newnode->coeff = t1->coeff;
+            newnode->pow = t1->pow;
+            temp->link = newnode;
+            temp = newnode;
+            t1 = t1->link;
+        } else {
+            newnode->coeff = t2->coeff;
+            newnode->pow = t2->pow;
+            temp->link = newnode;
+            temp = newnode;
+            t2 = t2->link;
+        }
+    }
+   
+    while(t1 != NULL) {
+        newnode=(struct node*)malloc(sizeof(struct node));
+        newnode->coeff = t1->coeff;
+        newnode->pow = t1->pow;
+        temp->link = newnode;
+        temp = newnode;
+        t1 = t1->link;
+    }
+   
+    while(t2 != NULL) {
+        newnode=(struct node*)malloc(sizeof(struct node));
+        newnode->coeff = t2->coeff;
+        newnode->pow = t2->pow;
+        temp->link = newnode;
+        temp = newnode;
+        t2 = t2->link;
+    }
+    temp->link = NULL;
+    return result->link;
+}
+struct node* subtractpoly(struct node* poly1, struct node* poly2, struct node* result) {
+    struct node* t1 = poly1;
+    struct node* t2 = poly2;
+    temp = result;
+    while (t1 != NULL && t2 != NULL) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+        if (t1->pow == t2->pow) {
+            newnode->coeff = t1->coeff - t2->coeff;
+            newnode->pow = t1->pow;
+            temp->link = newnode;
+            temp = newnode;
+            t1 = t1->link;
+            t2 = t2->link;
+        } else if (t1->pow > t2->pow) {
+            newnode->coeff = t1->coeff;
+            newnode->pow = t1->pow;
+            temp->link = newnode;
+            temp = newnode;
+            t1 = t1->link;
+        } else {
+            newnode->coeff = -(t2->coeff);
+            newnode->pow = t2->pow;
+            temp->link = newnode;
+            temp = newnode;
+            t2 = t2->link;
+        }
+    }
+   
+    while (t1 != NULL) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+        newnode->coeff = t1->coeff;
+        newnode->pow = t1->pow;
+        temp->link = newnode;
+        temp = newnode;
+        t1 = t1->link;
+    }
+   
+    while (t2 != NULL) {
+        newnode = (struct node*)malloc(sizeof(struct node));
+        newnode->coeff = -(t2->coeff);
+        newnode->pow = t2->pow;
+        temp->link = newnode;
+        temp = newnode;
+        t2 = t2->link;
+    }
+    temp->link = NULL;
+    return result->link;
+}
+struct node* multiplypoly(struct node* poly1, struct node* poly2) {
+    struct node* result = NULL;
+
+    struct node* t1 = poly1;
+    while (t1 != NULL) {
+        struct node* t2 = poly2;
+        while (t2 != NULL) {
+            // Multiply coefficients and add powers
+            int coeff = t1->coeff * t2->coeff;
+            int pow = t1->pow + t2->pow;
+
+            // Search for existing term with the same power in the result polynomial
+            struct node* temp = result;
+            struct node* prev = NULL;
+            while (temp != NULL && temp->pow > pow) {
+                prev = temp;
+                temp = temp->link;
+            }
+
+            if (temp != NULL && temp->pow == pow) {
+                // If a term with the same power exists, update its coefficient
+                temp->coeff += coeff;
+            } else {
+                // If no term with the same power exists, create a new node for the result polynomial
+                struct node* newnode = (struct node*)malloc(sizeof(struct node));
+                newnode->coeff = coeff;
+                newnode->pow = pow;
+
+                if (prev == NULL) {
+                    // If new term is to be inserted at the beginning
+                    newnode->link = result;
+                    result = newnode;
+                } else {
+                    // If new term is to be inserted in between or at the end
+                    prev->link = newnode;
+                    newnode->link = temp;
+                }
+            }
+
+            t2 = t2->link; // Move to the next term of poly2
+        }
+        t1 = t1->link; // Move to the next term of poly1
+    }
+
+    return result; // Return the result polynomial
+}
+
+
+
+int main() {
+    printf("Enter poly1:\n");
+    poly1 = createlist(poly1);
+    display(poly1);
+   
+    printf("\nEnter poly2:\n");
+    poly2 = createlist(poly2);
+    display(poly2);
+    int c;
+    printf("enter 1 to add and 2 to sub and 3 to multiply:");
+    scanf("%d",&c);
+    switch(c)
+    {
+        case 1:
+        printf("\nAddition:\n");
+        result = (struct node*)malloc(sizeof(struct node));
+        result = addpoly(poly1, poly2, result);
+        display(result);
+        break;
+        case 2:
+        printf("\nsubtraction:\n");
+        result = (struct node*)malloc(sizeof(struct node));
+        result = subtractpoly(poly1, poly2, result);
+        display(result);
+        case 3:
+        printf("\nMultiplication:\n");
+        result = multiplypoly(poly1, poly2);
+        display(result);
+        break;
+
+    }
+
+    return 0;
+}
